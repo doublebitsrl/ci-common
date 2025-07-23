@@ -81,7 +81,7 @@ function formatReport() {
       'REVIEW': '⚠️',
       'FAIL': '❌'
     };
-    markdown += `### Final Recommendation\n\n`;
+    markdown += `### Challenge Result\n\n`;
     markdown += `${recommendationEmoji[aiReview.recommendation] || '⚠️'} **${aiReview.recommendation}**\n\n`;
 
     // Write the combined report
