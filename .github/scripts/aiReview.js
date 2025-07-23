@@ -36,6 +36,7 @@ EVALUATION CRITERIA:
 - Maintainability (1-10): Modularity, testability, extensibility, documentation
 
 SCORING GUIDELINES:
+- 0: Not implemented
 - 1-3: Poor/Unacceptable
 - 4-6: Below Average/Needs Improvement
 - 7-8: Good/Acceptable
