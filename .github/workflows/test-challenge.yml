@@ -8,7 +8,6 @@ on:
         required: true
         type: string
     secrets:
-      # dichiariamo esplicitamente che questo workflow si aspetta un secret
       PRIVATE_REPO_PAT:
         required: true
 
@@ -26,7 +25,7 @@ jobs:
             echo "✅ PRIVATE_REPO_PAT is SET"
           fi
 
-      # 1) checkout del codice candidato
+      # 1) checkout del codice candidato (il template-repo)
       - uses: actions/checkout@v3
 
       # 2) checkout del repo privato dei test
@@ -36,6 +35,12 @@ jobs:
           repository: doublebitsrl/hiring-tests
           path: hiring-tests
           token: ${{ secrets.PRIVATE_REPO_PAT }}
+
+      # ← NUOVO STEP: copio il tuo stub src/tracker.js dentro hiring-tests/src
+      - name: Copy tracker stub into hiring-tests
+        run: |
+          mkdir -p hiring-tests/src
+          cp src/tracker.js hiring-tests/src/tracker.js
 
       # 3) install dei test
       - name: Install hiring-tests dependencies
