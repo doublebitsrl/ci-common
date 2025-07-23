@@ -28,33 +28,10 @@ const codeContent = fs.existsSync(codePath)
   : "// no code found";
 
 const prompt = `
-Please review this JavaScript code and provide a structured analysis in JSON format with the following structure:
-
-{
-  "overall_score": number (1-10),
-  "code_quality": {
-    "score": number (1-10),
-    "comments": "string"
-  },
-  "best_practices": {
-    "score": number (1-10),
-    "comments": "string"
-  },
-  "performance": {
-    "score": number (1-10),
-    "comments": "string"
-  },
-  "maintainability": {
-    "score": number (1-10),
-    "comments": "string"
-  },
-  "strengths": ["array of strings"],
-  "improvements": ["array of strings"],
-  "recommendation": "PASS|REVIEW|FAIL"
-}
+Please review the following code and provide a structured JSON assessment using the available tool:
 
 Code to review:
-\`\`\`javascript
+\`\`\`
 ${codeContent}
 \`\`\`
 `;
@@ -62,20 +39,150 @@ ${codeContent}
 const run = async () => {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: "You are a senior software engineer reviewing code for a hiring process. Provide detailed, constructive feedback in the exact JSON format requested."
+        model: "gpt-4o", // oppure "gpt-4-1106-preview"
+        messages: [
+          {
+            role: "system",
+            content: "You are a senior software engineer reviewing code for a hiring process. Provide your response ONLY by calling the tool function with complete and accurate data."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "code_review_assessment",
+              description: "Structured evaluation of a candidate's code submission.",
+              parameters: {
+                type: "object",
+                properties: {
+                  overall_score: {
+                    type: "number",
+                    description: "Overall score between 1 and 10",
+                    minimum: 1,
+                    maximum: 10
+                  },
+                  code_quality: {
+                    type: "object",
+                    description: "Assessment of code quality",
+                    properties: {
+                      score: {
+                        type: "number",
+                        description: "Score for code quality (1-10)",
+                        minimum: 1,
+                        maximum: 10
+                      },
+                      comments: {
+                        type: "string",
+                        description: "Comments about the code quality"
+                      }
+                    },
+                    required: ["score", "comments"],
+                    additionalProperties: false
+                  },
+                  best_practices: {
+                    type: "object",
+                    description: "Assessment of adherence to best practices",
+                    properties: {
+                      score: {
+                        type: "number",
+                        description: "Score for best practices (1-10)",
+                        minimum: 1,
+                        maximum: 10
+                      },
+                      comments: {
+                        type: "string",
+                        description: "Comments about best practices"
+                      }
+                    },
+                    required: ["score", "comments"],
+                    additionalProperties: false
+                  },
+                  performance: {
+                    type: "object",
+                    description: "Assessment of code performance",
+                    properties: {
+                      score: {
+                        type: "number",
+                        description: "Score for performance (1-10)",
+                        minimum: 1,
+                        maximum: 10
+                      },
+                      comments: {
+                        type: "string",
+                        description: "Comments about performance"
+                      }
+                    },
+                    required: ["score", "comments"],
+                    additionalProperties: false
+                  },
+                  maintainability: {
+                    type: "object",
+                    description: "Assessment of code maintainability",
+                    properties: {
+                      score: {
+                        type: "number",
+                        description: "Score for maintainability (1-10)",
+                        minimum: 1,
+                        maximum: 10
+                      },
+                      comments: {
+                        type: "string",
+                        description: "Comments about maintainability"
+                      }
+                    },
+                    required: ["score", "comments"],
+                    additionalProperties: false
+                  },
+                  strengths: {
+                    type: "array",
+                    description: "List of strengths identified in the code",
+                    items: {
+                      type: "string",
+                      description: "A particular strength"
+                    }
+                  },
+                  improvements: {
+                    type: "array",
+                    description: "Areas for improvement",
+                    items: {
+                      type: "string",
+                      description: "A suggested improvement"
+                    }
+                  },
+                  recommendation: {
+                    type: "string",
+                    description: "Final recommendation for the code review",
+                    enum: ["PASS", "REVIEW", "FAIL"]
+                  }
+                },
+                required: [
+                  "overall_score",
+                  "code_quality",
+                  "best_practices",
+                  "performance",
+                  "maintainability",
+                  "strengths",
+                  "improvements",
+                  "recommendation"
+                ],
+                additionalProperties: false
+              }
+            }
+          }
+        ],
+        tool_choice: {
+          type: "function",
+          function: {
+            name: "code_review_assessment"
+          }
         },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.3
-    });
+        response_format: "json_object", // ✅ ora è valido perché stai usando tools
+        temperature: 0.3
+      });
 
     const aiReview = JSON.parse(response.choices[0].message.content);
 
