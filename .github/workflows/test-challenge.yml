@@ -65,17 +65,17 @@ jobs:
           cd hiring-tests
           npm run test:ci -- --testPathPattern="tests/${{ inputs.challengeId }}/"
 
-      # 8) Format report.json in summary.md (tabella Markdown)
-      - name: Format test report
-        run: |
-          node ci-common/.github/scripts/formatReport.js
-
-      # 9) AI Code Review con OpenAI
+      # 8) AI Code Review con OpenAI
       - name: AI Code Review
         run: |
           node ci-common/.github/scripts/aiReview.js
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      # 9) Format report.json in summary.md (tabella Markdown)
+      - name: Format combined report
+        run: |
+          node ci-common/.github/scripts/formatReport.js
 
       # 10) Commenta la PR con tabella + valutazione AI
       - name: Comment PR with results
@@ -83,17 +83,11 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const table = fs.readFileSync('hiring-tests/summary.md', 'utf8');
-            const aiReview = fs.readFileSync('hiring-tests/ai_review.md', 'utf8');
-            const body = [
-              '### 📊 Risultati automatici dei test',
-              table,
-              '### 🤖 Valutazione AI del codice',
-              aiReview
-            ].join('\n\n');
+            const combinedReport = fs.readFileSync('hiring-tests/summary.md', 'utf8');
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body
+              body: combinedReport
             });
