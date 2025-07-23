@@ -2,6 +2,7 @@
   "name": "ci-common",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "format-report": "node .github/scripts/formatReport.js"
   },

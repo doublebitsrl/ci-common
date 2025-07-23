@@ -1,5 +1,6 @@
 // ci-common/.github/scripts/formatReport.js
-const fs = require('fs');
+import fs from 'fs';
+
 const report = JSON.parse(fs.readFileSync('hiring-tests/report.json', 'utf8'));
 
 const rows = report.testResults.flatMap(suite =>
