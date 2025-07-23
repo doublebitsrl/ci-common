@@ -73,15 +73,16 @@ jobs:
       # 9) AI Code Review con OpenAI
       - name: AI Code Review
         run: |
-          cd hiring-tests
-          CODE_SNIPPET=$(find src -type f -name '*.js' -exec sed -n '1,200p' {} + | head -n 2000)
-          RESPONSE=$(npx openai chat.completions.create \
-            --model gpt-4 \
-            --stream=false \
-            --temperature 0.2 \
-            --max-tokens 150 \
-            --messages "[{\"role\":\"system\",\"content\":\"You are an expert code reviewer focusing on readability, performance and requirements compliance.\"},{\"role\":\"user\",\"content\":\"Please review this JavaScript code snippet:\\n\`\`\`js\n$CODE_SNIPPET\n\`\`\`\"}]")
-          echo "$RESPONSE" > ai_review.md
+          CODE_SNIPPET=$(find hiring-tests/src -type f -name '*.js' -exec sed -n '1,200p' {} + | head -n 2000)
+          RESPONSE=$(
+            npx --prefix ci-common openai chat.completions.create \
+              --model gpt-4 \
+              --stream=false \
+              --temperature 0.2 \
+              --max-tokens 150 \
+              --messages "[{\"role\":\"system\",\"content\":\"You are an expert code reviewer focusing on readability, performance and requirements compliance.\"},{\"role\":\"user\",\"content\":\"Please review this JavaScript code snippet:\\n\`\`\`js\n$CODE_SNIPPET\n\`\`\`\"}]"
+          )
+          echo "$RESPONSE" > hiring-tests/ai_review.md
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 

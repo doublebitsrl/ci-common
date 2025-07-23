@@ -6,6 +6,6 @@
     "format-report": "node .github/scripts/formatReport.js"
   },
   "devDependencies": {
-    "openai": "^4.3.0"
+    "openai": "^5.10.2"
   }
 }
