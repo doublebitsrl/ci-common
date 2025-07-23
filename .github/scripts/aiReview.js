@@ -180,7 +180,7 @@ const run = async () => {
             name: "code_review_assessment"
           }
         },
-        response_format: "json_object", // ✅ ora è valido perché stai usando tools
+        response_format: { type: "json_object" },
         temperature: 0.3
       });
 
