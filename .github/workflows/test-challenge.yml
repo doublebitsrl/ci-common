@@ -13,6 +13,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Debug PRIVATE_REPO_PAT
+        run: |
+          if [ -z "${{ secrets.PRIVATE_REPO_PAT }}" ]; then
+            echo "⛔ PRIVATE_REPO_PAT is EMPTY"
+            exit 1
+          else
+            echo "✅ PRIVATE_REPO_PAT is SET"
+          fi
+
       # 1) checkout del codice candidato
       - uses: actions/checkout@v3
 
