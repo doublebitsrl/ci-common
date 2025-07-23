@@ -16,8 +16,13 @@ function formatReport() {
 
     reportData.testResults.forEach(suite => {
       const status = suite.numFailingTests === 0 ? '✅ PASS' : '❌ FAIL';
-      const duration = `${(suite.perfStats.end - suite.perfStats.start)}ms`;
-      markdown += `| ${suite.testFilePath.split('/').pop()} | ${status} | ${suite.numTotalTests} | ${suite.numPassingTests} | ${suite.numFailingTests} | ${duration} |\n`;
+      // Safety check for perfStats to prevent undefined errors
+      const duration = suite.perfStats && suite.perfStats.end && suite.perfStats.start
+        ? `${(suite.perfStats.end - suite.perfStats.start)}ms`
+        : 'N/A';
+      // Use 'name' property instead of 'testFilePath' and add safety check
+      const testName = suite.name ? suite.name.split('/').pop() : 'Unknown Test';
+      markdown += `| ${testName} | ${status} | ${suite.numTotalTests || 0} | ${suite.numPassingTests || 0} | ${suite.numFailingTests || 0} | ${duration} |\n`;
     });
 
     // Add summary
