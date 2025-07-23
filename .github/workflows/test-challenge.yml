@@ -72,17 +72,39 @@ jobs:
 
       # 9) AI Code Review con OpenAI
       - name: AI Code Review
+        shell: bash
+        working-directory: hiring-tests
         run: |
-          CODE_SNIPPET=$(find hiring-tests/src -type f -name '*.js' -exec sed -n '1,200p' {} + | head -n 2000)
+          set +e
+
+          # 1) Prepara snippet in modo sicuro
+          if [[ -f src/tracker.js ]]; then
+            SNIPPET=$(head -n2000 src/tracker.js)
+          else
+            SNIPPET="// no code found"
+          fi
+          echo "🔍 Snippet length: ${#SNIPPET}"
+
+          # 2) Invoca OpenAI
+          #   Se fallisce, salta avanti senza interrompere il job
           RESPONSE=$(
-            npx --prefix ci-common openai chat.completions.create \
+            npx --prefix ../ci-common openai chat.completions.create \
               --model gpt-4 \
               --stream=false \
               --temperature 0.2 \
               --max-tokens 150 \
-              --messages "[{\"role\":\"system\",\"content\":\"You are an expert code reviewer focusing on readability, performance and requirements compliance.\"},{\"role\":\"user\",\"content\":\"Please review this JavaScript code snippet:\\n\`\`\`js\n$CODE_SNIPPET\n\`\`\`\"}]"
+              --messages "[\
+            {\"role\":\"system\",\"content\":\"You are an expert code reviewer focusing on readability, performance and requirements compliance.\"},\
+            {\"role\":\"user\",\"content\":\"Please review this JavaScript code snippet:\\n\`\`\`js\n${SNIPPET}\n\`\`\`\"}\
+            ]" 2>&1
           )
-          echo "$RESPONSE" > hiring-tests/ai_review.md
+          echo "📝 OpenAI output (truncated):"
+          echo "${RESPONSE:0:500}"  # mostra i primi 500 char per debug
+
+          # 3) Salva comunque il file, anche se RESPONSE è vuoto o ha errori
+          echo "$RESPONSE" > ai_review.md
+
+          exit 0        # forza sempre successo
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
