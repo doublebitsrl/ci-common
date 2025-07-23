@@ -1,0 +1,45 @@
+name: "Run Challenge Tests"
+description: "Runs tests for a specific challenge and posts results to the PR."
+
+on:
+  workflow_call:
+    inputs:
+      challengeId:
+        required: true
+        type: string
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) checkout del codice candidato
+      - uses: actions/checkout@v3
+
+      # 2) checkout del repo privato dei test
+      - name: Checkout hiring-tests
+        uses: actions/checkout@v3
+        with:
+          repository: doublebitsrl/hiring-tests
+          path: hiring-tests
+          token: ${{ secrets.PRIVATE_REPO_PAT }}
+
+      # 3) install dei test
+      - name: Install hiring-tests dependencies
+        run: |
+          cd hiring-tests
+          npm ci
+
+      # 4) esecuzione tests per il challenge specifico
+      - name: Run challenge tests
+        run: |
+          cd hiring-tests
+          npm run test:ci -- --testPathPattern="tests/${{ inputs.challengeId }}/"
+
+      # 5) pubblica report su PR
+      - name: Comment PR with report
+        if: always()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: hiring-tests/report.json
+          header: "## Risultati Test – ${{ inputs.challengeId }}"
