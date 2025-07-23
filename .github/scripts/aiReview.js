@@ -30,10 +30,10 @@ const codeContent = fs.existsSync(codePath)
 const systemPrompt = `You are a senior software engineer reviewing code for a hiring process.
 
 EVALUATION CRITERIA:
-- Code Quality (1-10): Readability, structure, naming conventions, comments
-- Best Practices (1-10): Error handling, security, proper patterns, standards compliance
-- Performance (1-10): Efficiency, optimization, resource usage
-- Maintainability (1-10): Modularity, testability, extensibility, documentation
+- Code Quality (0-10): Readability, structure, naming conventions, comments
+- Best Practices (0-10): Error handling, security, proper patterns, standards compliance
+- Performance (0-10): Efficiency, optimization, resource usage
+- Maintainability (0-10): Modularity, testability, extensibility, documentation
 
 SCORING GUIDELINES:
 - 0: Functionality not implemented or not found
@@ -78,8 +78,8 @@ const run = async () => {
                 properties: {
                   overall_score: {
                     type: "number",
-                    description: "Overall score between 1 and 10",
-                    minimum: 1,
+                    description: "Overall score between 0 and 10",
+                    minimum: 0,
                     maximum: 10
                   },
                   code_quality: {
@@ -88,8 +88,8 @@ const run = async () => {
                     properties: {
                       score: {
                         type: "number",
-                        description: "Score for code quality (1-10)",
-                        minimum: 1,
+                        description: "Score for code quality (0-10)",
+                        minimum: 0,
                         maximum: 10
                       },
                       comments: {
@@ -106,8 +106,8 @@ const run = async () => {
                     properties: {
                       score: {
                         type: "number",
-                        description: "Score for best practices (1-10)",
-                        minimum: 1,
+                        description: "Score for best practices (0-10)",
+                        minimum: 0,
                         maximum: 10
                       },
                       comments: {
@@ -124,8 +124,8 @@ const run = async () => {
                     properties: {
                       score: {
                         type: "number",
-                        description: "Score for performance (1-10)",
-                        minimum: 1,
+                        description: "Score for performance (0-10)",
+                        minimum: 0,
                         maximum: 10
                       },
                       comments: {
@@ -142,8 +142,8 @@ const run = async () => {
                     properties: {
                       score: {
                         type: "number",
-                        description: "Score for maintainability (1-10)",
-                        minimum: 1,
+                        description: "Score for maintainability (0-10)",
+                        minimum: 0,
                         maximum: 10
                       },
                       comments: {
