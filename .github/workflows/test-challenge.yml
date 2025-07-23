@@ -7,6 +7,10 @@ on:
       challengeId:
         required: true
         type: string
+    secrets:
+      # dichiariamo esplicitamente che questo workflow si aspetta un secret
+      PRIVATE_REPO_PAT:
+        required: true
 
 jobs:
   run-tests:
