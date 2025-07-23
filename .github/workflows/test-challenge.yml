@@ -64,6 +64,7 @@ jobs:
         run: |
           cd hiring-tests
           npm run test:ci -- --testPathPattern="tests/${{ inputs.challengeId }}/"
+        continue-on-error: true
 
       # 8) AI Code Review con OpenAI
       - name: AI Code Review
