@@ -14,6 +14,10 @@ function formatReport() {
     markdown += '| Test Suite | Status | Tests | Passed | Failed | Duration |\n';
     markdown += '|------------|--------|-------|--------|--------|---------|\n';
 
+    console.log('Formatting test results...');
+    console.log("Report Data:", reportData);
+    console.log("testResults:", reportData.testResults);
+
     reportData.testResults.forEach(suite => {
       const status = suite.numFailingTests === 0 ? '✅ PASS' : '❌ FAIL';
       // Safety check for perfStats to prevent undefined errors
