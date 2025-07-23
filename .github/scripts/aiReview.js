@@ -33,5 +33,8 @@ const run = async () => {
 
 run().catch((e) => {
   console.error("❌ Failed AI review:", e);
+  // Create a fallback ai_review.md file to prevent ENOENT errors
+  const fallbackContent = "AI review could not be completed due to an error. Please review the code manually.";
+  fs.writeFileSync("hiring-tests/ai_review.md", fallbackContent);
   process.exit(0); // Non bloccare il workflow
 });
