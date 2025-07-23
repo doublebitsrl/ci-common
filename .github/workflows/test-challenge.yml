@@ -37,7 +37,7 @@ jobs:
       - name: Checkout ci-common
         uses: actions/checkout@v3
         with:
-          repository: your-org/ci-common
+          repository: doublebitsrl/ci-common
           path: ci-common
           token: ${{ secrets.PRIVATE_REPO_PAT }}
 
