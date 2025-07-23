@@ -14,22 +14,23 @@ function formatReport() {
     markdown += '| Test Suite | Status | Tests | Passed | Failed | Duration |\n';
     markdown += '|------------|--------|-------|--------|--------|---------|\n';
 
-    console.log('Formatting test results...');
-    console.log("Report Data:", reportData);
-    console.log("testResults:", reportData.testResults);
-    console.log("Assertions:", reportData.testResults.map(suite => suite.assertionResults).flat());
-    console.log("Total Assertions:", reportData.testResults.reduce((acc, suite) => acc + suite.assertionResults.length, 0));
-
-
+    // TODO: create the markdown table for each test suite
     reportData.testResults.forEach(suite => {
-      const status = suite.numFailingTests === 0 ? '✅ PASS' : '❌ FAIL';
-      // Safety check for perfStats to prevent undefined errors
-      const duration = suite.perfStats && suite.perfStats.end && suite.perfStats.start
-        ? `${(suite.perfStats.end - suite.perfStats.start)}ms`
-        : 'N/A';
-      // Use 'name' property instead of 'testFilePath' and add safety check
-      const testName = suite.name ? suite.name.split('/').pop() : 'Unknown Test';
-      markdown += `| ${testName} | ${status} | ${suite.numTotalTests || 0} | ${suite.numPassingTests || 0} | ${suite.numFailingTests || 0} | ${duration} |\n`;
+      // Extract test suite name from the file path
+      const testName = suite.name.split('/').pop().replace('.spec.js', '').replace('.test.js', '');
+
+      // Determine status based on test results
+      const status = suite.status === 'passed' ? '✅ PASS' : '❌ FAIL';
+
+      // Calculate total tests and passed/failed counts
+      const totalTests = suite.assertionResults.length;
+      const passedTests = suite.assertionResults.filter(test => test.status === 'passed').length;
+      const failedTests = suite.assertionResults.filter(test => test.status === 'failed').length;
+
+      // Calculate duration in milliseconds
+      const duration = `${suite.endTime - suite.startTime}ms`;
+
+      markdown += `| ${testName} | ${status} | ${totalTests} | ${passedTests} | ${failedTests} | ${duration} |\n`;
     });
 
     // Add summary
