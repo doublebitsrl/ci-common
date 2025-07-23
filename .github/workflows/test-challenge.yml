@@ -47,11 +47,11 @@ jobs:
           cd ci-common
           npm ci
 
-      # 5) Copia lo stub tracker nel repo dei test
-      - name: Copy tracker stub into hiring-tests
+      # 5) Copia lo stub main nel repo dei test
+      - name: Copy main stub into hiring-tests
         run: |
           mkdir -p hiring-tests/src
-          cp src/tracker.js hiring-tests/src/tracker.js
+          cp src/main.js hiring-tests/src/main.js
 
       # 6) Installa le dipendenze dei test
       - name: Install hiring-tests dependencies

@@ -22,7 +22,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const codePath = "hiring-tests/src/tracker.js";
+const codePath = "hiring-tests/src/main.js";
 const codeContent = fs.existsSync(codePath)
   ? fs.readFileSync(codePath, "utf8")
   : "// no code found";
