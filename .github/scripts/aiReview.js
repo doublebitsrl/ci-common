@@ -27,6 +27,22 @@ const codeContent = fs.existsSync(codePath)
   ? fs.readFileSync(codePath, "utf8")
   : "// no code found";
 
+const systemPrompt = `You are a senior software engineer reviewing code for a hiring process.
+
+EVALUATION CRITERIA:
+- Code Quality (1-10): Readability, structure, naming conventions, comments
+- Best Practices (1-10): Error handling, security, proper patterns, standards compliance
+- Performance (1-10): Efficiency, optimization, resource usage
+- Maintainability (1-10): Modularity, testability, extensibility, documentation
+
+SCORING GUIDELINES:
+- 1-3: Poor/Unacceptable
+- 4-6: Below Average/Needs Improvement
+- 7-8: Good/Acceptable
+- 9-10: Excellent/Outstanding
+
+Be consistent in your scoring. Focus on objective technical criteria rather than subjective preferences.`
+
 const prompt = `
 Please review the following code and provide a structured JSON assessment using the available tool:
 
@@ -43,7 +59,7 @@ const run = async () => {
         messages: [
           {
             role: "system",
-            content: "You are a senior software engineer reviewing code for a hiring process. Provide your response ONLY by calling the tool function with complete and accurate data."
+            content: systemPrompt
           },
           {
             role: "user",
@@ -181,16 +197,20 @@ const run = async () => {
           }
         },
         response_format: { type: "json_object" },
-        temperature: 0.3
+        temperature: 0
       });
 
-    const aiReview = JSON.parse(response.choices[0].message.content);
+    const toolCall = response.choices?.[0]?.message?.tool_calls?.[0];
+    if (!toolCall || toolCall.function.name !== "code_review_assessment") {
+      throw new Error("Tool call response is missing or malformed");
+    }
+
+    const aiReview = JSON.parse(toolCall.function.arguments);
 
     // Save the structured review as JSON
     fs.writeFileSync('hiring-tests/ai_review.json', JSON.stringify(aiReview, null, 2));
 
     console.log('AI review completed successfully');
-    console.log(`Overall score: ${aiReview.overall_score}/10`);
   } catch (error) {
     console.error("❌ OpenAI API Error:", error.message);
 
