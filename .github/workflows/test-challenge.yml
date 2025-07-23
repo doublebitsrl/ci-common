@@ -68,8 +68,7 @@ jobs:
       # 8) Format report.json in summary.md (tabella Markdown)
       - name: Format test report
         run: |
-          cd hiring-tests
-          node ../ci-common/.github/scripts/formatReport.js
+          node ci-common/.github/scripts/formatReport.js
 
       # 9) AI Code Review con OpenAI
       - name: AI Code Review
