@@ -10,12 +10,18 @@ on:
     secrets:
       PRIVATE_REPO_PAT:
         required: true
+      OPENAI_API_KEY:
+        required: true
 
 jobs:
   run-tests:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
+      # 0) Debug secret
       - name: Debug PRIVATE_REPO_PAT
         run: |
           if [ -z "${{ secrets.PRIVATE_REPO_PAT }}" ]; then
@@ -25,10 +31,11 @@ jobs:
             echo "✅ PRIVATE_REPO_PAT is SET"
           fi
 
-      # 1) checkout del codice candidato (il template-repo)
-      - uses: actions/checkout@v3
+      # 1) Checkout del codice candidato (template-repo)
+      - name: Checkout candidate code
+        uses: actions/checkout@v3
 
-      # 2) checkout del repo privato dei test
+      # 2) Checkout del repo privato dei test
       - name: Checkout hiring-tests
         uses: actions/checkout@v3
         with:
@@ -36,28 +43,76 @@ jobs:
           path: hiring-tests
           token: ${{ secrets.PRIVATE_REPO_PAT }}
 
-      # ← NUOVO STEP: copio il tuo stub src/tracker.js dentro hiring-tests/src
+      # 3) Checkout del repo ci-common (per lo script di formattazione)
+      - name: Checkout ci-common
+        uses: actions/checkout@v3
+        with:
+          repository: your-org/ci-common
+          path: ci-common
+          token: ${{ secrets.PRIVATE_REPO_PAT }}
+
+      # 4) Install deps di ci-common (openai + helper)
+      - name: Install ci-common dependencies
+        run: |
+          cd ci-common
+          npm ci
+
+      # 5) Copia lo stub tracker nel repo dei test
       - name: Copy tracker stub into hiring-tests
         run: |
           mkdir -p hiring-tests/src
           cp src/tracker.js hiring-tests/src/tracker.js
 
-      # 3) install dei test
+      # 6) Installa le dipendenze dei test
       - name: Install hiring-tests dependencies
         run: |
           cd hiring-tests
-          npm ci
+          npm install --no-audit --prefer-offline --progress=false
 
-      # 4) esecuzione tests per il challenge specifico
+      # 7) Esegui i test per il challenge selezionato
       - name: Run challenge tests
         run: |
           cd hiring-tests
           npm run test:ci -- --testPathPattern="tests/${{ inputs.challengeId }}/"
 
-      # 5) pubblica report su PR
-      - name: Comment PR with report
-        if: always()
-        uses: marocchino/sticky-pull-request-comment@v2
+      # 8) Format report.json in summary.md (tabella Markdown)
+      - name: Format test report
+        run: |
+          cd hiring-tests
+          node ../ci-common/.github/scripts/formatReport.js
+
+      # 9) AI Code Review con OpenAI
+      - name: AI Code Review
+        run: |
+          cd hiring-tests
+          CODE_SNIPPET=$(find src -type f -name '*.js' -exec sed -n '1,200p' {} + | head -n 2000)
+          RESPONSE=$(npx openai chat.completions.create \
+            --model gpt-4 \
+            --stream=false \
+            --temperature 0.2 \
+            --max-tokens 150 \
+            --messages "[{\"role\":\"system\",\"content\":\"You are an expert code reviewer focusing on readability, performance and requirements compliance.\"},{\"role\":\"user\",\"content\":\"Please review this JavaScript code snippet:\\n\`\`\`js\n$CODE_SNIPPET\n\`\`\`\"}]")
+          echo "$RESPONSE" > ai_review.md
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      # 10) Commenta la PR con tabella + valutazione AI
+      - name: Comment PR with results
+        uses: actions/github-script@v6
         with:
-          path: hiring-tests/report.json
-          header: "## Risultati Test – ${{ inputs.challengeId }}"
+          script: |
+            const fs = require('fs');
+            const table = fs.readFileSync('hiring-tests/summary.md', 'utf8');
+            const aiReview = fs.readFileSync('hiring-tests/ai_review.md', 'utf8');
+            const body = [
+              '### 📊 Risultati automatici dei test',
+              table,
+              '### 🤖 Valutazione AI del codice',
+              aiReview
+            ].join('\n\n');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });
