@@ -21,16 +21,6 @@ jobs:
       pull-requests: write
 
     steps:
-      # 0) Debug secret
-      - name: Debug PRIVATE_REPO_PAT
-        run: |
-          if [ -z "${{ secrets.PRIVATE_REPO_PAT }}" ]; then
-            echo "⛔ PRIVATE_REPO_PAT is EMPTY"
-            exit 1
-          else
-            echo "✅ PRIVATE_REPO_PAT is SET"
-          fi
-
       # 1) Checkout del codice candidato (template-repo)
       - name: Checkout candidate code
         uses: actions/checkout@v3
