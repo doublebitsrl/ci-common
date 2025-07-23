@@ -20,7 +20,24 @@ const snippet = fs.existsSync(codePath)
 
 const systemPrompt =
   "You are an expert code reviewer focusing on readability, performance and requirements compliance.";
-const userPrompt = `Please review this JavaScript code snippet:\n\`\`\`js\n${snippet}\n\`\`\``;
+const userPrompt = `You are a senior technical evaluator. You will be given a code snippet or technical solution from a candidate. Evaluate it objectively on a scale from 1 (poor) to 10 (excellent) based on these five criteria:
+
+1. Functional correctness: Does the code meet the requirements and run without errors?
+2. Performance: Is the implementation efficient and free of unnecessary overhead?
+3. Modularity & maintainability: Is it organized into reusable, testable modules/functions?
+4. Readability & style: Are naming, formatting, comments, and overall clarity high quality?
+5. Requirements completeness: Does it fulfill the brief exactly, using the required APIs and handling edge cases?
+
+For each criterion, provide:
+- A numeric score from 1 to 10
+- One brief sentence of justification
+
+Finally, compute the arithmetic mean of the five scores and return **only** the final overall score (a single number between 1 and 10).
+
+Please review this code snippet:
+\`\`\`js
+${snippet}
+\`\`\``;
 
 const run = async () => {
   try {
