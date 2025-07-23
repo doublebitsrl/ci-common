@@ -17,6 +17,9 @@ function formatReport() {
     console.log('Formatting test results...');
     console.log("Report Data:", reportData);
     console.log("testResults:", reportData.testResults);
+    console.log("Assertions:", reportData.testResults.map(suite => suite.assertionResults).flat());
+    console.log("Total Assertions:", reportData.testResults.reduce((acc, suite) => acc + suite.assertionResults.length, 0));
+
 
     reportData.testResults.forEach(suite => {
       const status = suite.numFailingTests === 0 ? '✅ PASS' : '❌ FAIL';
