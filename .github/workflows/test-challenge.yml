@@ -26,11 +26,11 @@ jobs:
         uses: actions/checkout@v3
 
       # 2) Checkout del repo privato dei test
-      - name: Checkout hiring-tests
+      - name: Checkout challenge-tests
         uses: actions/checkout@v3
         with:
-          repository: doublebitsrl/hiring-tests
-          path: hiring-tests
+          repository: doublebitsrl/challenge-tests
+          path: challenge-tests
           token: ${{ secrets.PRIVATE_REPO_PAT }}
 
       # 3) Checkout del repo ci-common (per lo script di formattazione)
@@ -48,21 +48,21 @@ jobs:
           npm ci
 
       # 5) Copia lo stub main nel repo dei test
-      - name: Copy main stub into hiring-tests
+      - name: Copy main stub into challenge-tests
         run: |
-          mkdir -p hiring-tests/src
-          cp src/main.js hiring-tests/src/main.js
+          mkdir -p challenge-tests/src
+          cp src/main.js challenge-tests/src/main.js
 
       # 6) Installa le dipendenze dei test
-      - name: Install hiring-tests dependencies
+      - name: Install challenge-tests dependencies
         run: |
-          cd hiring-tests
+          cd challenge-tests
           npm install --no-audit --prefer-offline --progress=false
 
       # 7) Esegui i test per il challenge selezionato
       - name: Run challenge tests
         run: |
-          cd hiring-tests
+          cd challenge-tests
           npm run test:ci -- --testPathPattern="tests/${{ inputs.challengeId }}/"
         continue-on-error: true
 
@@ -84,7 +84,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const combinedReport = fs.readFileSync('hiring-tests/summary.md', 'utf8');
+            const combinedReport = fs.readFileSync('challenge-tests/summary.md', 'utf8');
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,

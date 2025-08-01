@@ -14,7 +14,7 @@ if (!process.env.OPENAI_API_KEY) {
     improvements: ["Manual review required due to AI analysis failure"],
     recommendation: "REVIEW"
   };
-  fs.writeFileSync("hiring-tests/ai_review.json", JSON.stringify(fallbackReview, null, 2));
+  fs.writeFileSync("challenge-tests/ai_review.json", JSON.stringify(fallbackReview, null, 2));
   process.exit(0);
 }
 
@@ -22,7 +22,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const codePath = "hiring-tests/src/main.js";
+const codePath = "challenge-tests/src/main.js";
 const codeContent = fs.existsSync(codePath)
   ? fs.readFileSync(codePath, "utf8")
   : "// no code found";
@@ -209,7 +209,7 @@ const run = async () => {
     const aiReview = JSON.parse(toolCall.function.arguments);
 
     // Save the structured review as JSON
-    fs.writeFileSync('hiring-tests/ai_review.json', JSON.stringify(aiReview, null, 2));
+    fs.writeFileSync('challenge-tests/ai_review.json', JSON.stringify(aiReview, null, 2));
 
     console.log('AI review completed successfully');
   } catch (error) {
@@ -237,7 +237,7 @@ const run = async () => {
       fallbackReview.code_quality.comments = "Authentication error with OpenAI API";
     }
 
-    fs.writeFileSync('hiring-tests/ai_review.json', JSON.stringify(fallbackReview, null, 2));
+    fs.writeFileSync('challenge-tests/ai_review.json', JSON.stringify(fallbackReview, null, 2));
     throw error;
   }
 };
@@ -245,7 +245,7 @@ const run = async () => {
 run().catch((e) => {
   console.error("❌ Failed AI review:", e);
   // Ensure fallback file exists even if error handling above fails
-  if (!fs.existsSync("hiring-tests/ai_review.json")) {
+  if (!fs.existsSync("challenge-tests/ai_review.json")) {
     const fallbackReview = {
       overall_score: 5,
       code_quality: { score: 5, comments: "Unexpected error during analysis" },
@@ -256,7 +256,7 @@ run().catch((e) => {
       improvements: ["Manual review required due to unexpected error"],
       recommendation: "REVIEW"
     };
-    fs.writeFileSync("hiring-tests/ai_review.json", JSON.stringify(fallbackReview, null, 2));
+    fs.writeFileSync("challenge-tests/ai_review.json", JSON.stringify(fallbackReview, null, 2));
   }
   process.exit(0);
 });

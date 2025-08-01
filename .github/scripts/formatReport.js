@@ -4,10 +4,10 @@ import fs from 'fs';
 function formatReport() {
   try {
     // Read test results
-    const reportData = JSON.parse(fs.readFileSync('hiring-tests/report.json', 'utf8'));
+    const reportData = JSON.parse(fs.readFileSync('challenge-tests/report.json', 'utf8'));
 
     // Read AI review
-    const aiReview = JSON.parse(fs.readFileSync('hiring-tests/ai_review.json', 'utf8'));
+    const aiReview = JSON.parse(fs.readFileSync('challenge-tests/ai_review.json', 'utf8'));
 
     // Format test results table
     let markdown = '## 📊 Test Results\n\n';
@@ -85,7 +85,7 @@ function formatReport() {
     markdown += `${recommendationEmoji[aiReview.recommendation] || '⚠️'} **${aiReview.recommendation}**\n\n`;
 
     // Write the combined report
-    fs.writeFileSync('hiring-tests/summary.md', markdown);
+    fs.writeFileSync('challenge-tests/summary.md', markdown);
 
     console.log('Report formatted successfully');
   } catch (error) {
@@ -93,7 +93,7 @@ function formatReport() {
 
     // Create a fallback report if there's an error
     const fallbackMarkdown = `## 📊 Test Results\n\nError reading test results: ${error.message}\n\n## 🤖 AI Code Review\n\nError reading AI review: Please review manually.\n`;
-    fs.writeFileSync('hiring-tests/summary.md', fallbackMarkdown);
+    fs.writeFileSync('challenge-tests/summary.md', fallbackMarkdown);
 
     process.exit(1);
   }
